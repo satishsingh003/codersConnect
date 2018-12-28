@@ -1,15 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { loginUser } from '../../actions/authActions';
+import { forgotUser } from '../../actions/authActions';
 import TextFieldGroup from '../common/TextFieldGroup';
 
-class Login extends Component {
+class Forgotpassword extends Component {
   constructor() {
     super();
     this.state = {
       email: '',
-      password: '',
       errors: {}
     };
   }
@@ -32,13 +31,10 @@ class Login extends Component {
 
   onSubmit = e => {
     e.preventDefault();
-
     const userData = {
-      email: this.state.email,
-      password: this.state.password
+      email: this.state.email
     };
-
-    this.props.loginUser(userData);
+    this.props.forgotUser(userData);
   }
 
   onChange = e => {
@@ -76,8 +72,8 @@ class Login extends Component {
   }
 }
 
-Login.propTypes = {
-  loginUser: PropTypes.func.isRequired,
+Forgotpassword.propTypes = {
+  forgotUser: PropTypes.func.isRequired,
   auth: PropTypes.object.isRequired,
   errors: PropTypes.object.isRequired
 };
@@ -87,4 +83,4 @@ const mapStateToProps = state => ({
   errors: state.errors
 });
 
-export default connect(mapStateToProps, { loginUser })(Login);
+export default connect(mapStateToProps, { forgotUser })(Forgotpassword);

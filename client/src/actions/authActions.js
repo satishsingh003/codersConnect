@@ -40,7 +40,18 @@ export const loginUser = userData => dispatch => {
       })
     );
 };
-
+// ForgotPassword
+export const forgotUser = (userData, history) => dispatch => {
+  axios
+    .post('/api/users/forgotpassword', userData)
+    .then(res => history.push('/login'))
+    .catch(err =>
+      dispatch({
+        type: GET_ERRORS,
+        payload: err.response.data
+      })
+    );
+};
 // Set logged in user
 export const setCurrentUser = decoded => {
   return {

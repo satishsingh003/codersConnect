@@ -5,11 +5,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const keys = require('../../config/keys');
 const passport = require('passport');
+const sendEmail = require('../../helpers/');
 
 // Load Input Validation
 const validateRegisterInput = require('../../validation/register');
 const validateLoginInput = require('../../validation/login');
-
+const validateForgotPasswordInput = require('../../validation/forgotpassword');
 // Load User model
 const User = require('../../models/User');
 
@@ -57,6 +58,33 @@ router.post('/register', (req, res) => {
             .catch(err => console.log(err));
         });
       });
+    }
+  });
+});
+
+// @route   POST api/users/forgotpassword
+// @desc    Forgot Password
+// @access  Public
+router.post('/forgotpassword', (req, res) => {
+  const { errors, isValid } = validateForgotPasswordInput(req.body);
+  // Check Validation
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+  User.findOne({ email: req.body.email }).then(user => {
+    if (user) {
+      errors.email = 'Reset Link set to registered Email ID';
+      const emailData={
+        to:req.body.email,
+        subject:"Reset Password",
+        text:"Please use the following link for instruction to reset your password: ${APP_URL_BASE}/resetpass/${token}",
+        html:"<p>Please use the following link for instruction to reset your password: ${APP_URL_BASE}/resetpass/${token}</p>",
+      }
+      sendEmail(emailData);
+      return res.status(400).json(errors);
+    } else {
+      errors.email = 'Email not Registered';
+      return res.status(400).json(errors);
     }
   });
 });

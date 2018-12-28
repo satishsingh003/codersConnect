@@ -137,7 +137,7 @@ router.post(
             post.likes.filter(like => like.user.toString() === req.user.id)
               .length === 0
           ) {
-            return res
+             return res
               .status(400)
               .json({ notliked: 'You have not yet liked this post' });
           }
