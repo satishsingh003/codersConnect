@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const keys = require('../../config/keys');
 const passport = require('passport');
-const sendEmail = require('../../helpers/');
+const sendEmail = require('../../helpers/sendmail');
 
 // Load Input Validation
 const validateRegisterInput = require('../../validation/register');
@@ -61,24 +61,36 @@ router.post('/register', (req, res) => {
     }
   });
 });
-
+const randomString = length => {
+  let text = "";
+  const possible = "abcdefghijklmnopqrstuvwxyz0123456789_-.";
+  for (let i = 0; i < length; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+}
 // @route   POST api/users/forgotpassword
 // @desc    Forgot Password
 // @access  Public
-router.post('/forgotpassword', (req, res) => {
+router.put('/forgotpassword', (req, res) => {
+  if (!req.body) return res.status(400).json({ message: "No Request body" });
+  if (!req.body.email) return res.status(400).json({ message: "No Email in the Request body" });
+  const token = randomString(40);
   const { errors, isValid } = validateForgotPasswordInput(req.body);
+
   // Check Validation
   if (!isValid) {
     return res.status(400).json(errors);
   }
-  User.findOne({ email: req.body.email }).then(user => {
+  var APP_URL_BASE=process.env;
+  User.updateOne({ email: req.body.email }, { $set: { resetPassLink: token } }).then(user => {
     if (user) {
       errors.email = 'Reset Link set to registered Email ID';
-      const emailData={
-        to:req.body.email,
-        subject:"Reset Password",
-        text:"Please use the following link for instruction to reset your password: ${APP_URL_BASE}/resetpass/${token}",
-        html:"<p>Please use the following link for instruction to reset your password: ${APP_URL_BASE}/resetpass/${token}</p>",
+      const emailData = {
+        to: req.body.email,
+        subject: "Reset Password",
+        text: "Please use the following link for instruction to reset your password: ${APP_URL_BASE}/resetpass/${token}",
+        html: "<p>Please use the following link for instruction to reset your password: ${APP_URL_BASE}/resetpass/${token}</p>",
       }
       sendEmail(emailData);
       return res.status(400).json(errors);
@@ -88,6 +100,23 @@ router.post('/forgotpassword', (req, res) => {
     }
   });
 });
+
+// @route   POST api/users/resetpass
+// @desc    Reset Password
+// @access  Public
+router.put('/resetpass', (req, res) => {
+  const { resetPassLink, newPassword } = req.body;
+  bcrypt.genSalt(10, (err, salt) => {
+    bcrypt.hash(newPassword, salt, (err, hash) => {
+      if (err) throw err;
+      User.password = hash;
+      User.update({resetPassLink},{$set:{password:hash,resetPassLink:''}})
+      .then(user => res.json(User))
+      .catch(err => console.log(err));
+    });
+  });
+});
+
 
 // @route   GET api/users/login
 // @desc    Login User / Returning JWT Token

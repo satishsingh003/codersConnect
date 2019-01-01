@@ -1,8 +1,11 @@
 const { SMTP_URL } = process.env;
-const passport = require('nodemailer');
+const nodemailer = require('nodemailer');
+const xoauth2 = require('xoauth2');
 
-const sendEmail = (emailData, smtp_url = SMTP_URL) => {
-    const defaultEmailData = { from: 'codersconnect@gmail.com' };
+
+
+module.exports = function sendEmail (emailData, smtp_url = SMTP_URL){
+    const defaultEmailData = { from: 'satishsinghoct87@gmail.com' };
     const completeEmailData = Object.assign(defaultEmailData, emailData);
     transporter = nodemailer.createTransport(SMTP_URL);
     return transporter
@@ -10,4 +13,3 @@ const sendEmail = (emailData, smtp_url = SMTP_URL) => {
       .then(info => console.log(`Messsage sent:${info.messsage}`))
       .catch(err => console.log(`Problem Sending Email:${err}`))
   }
-  module.export ={sendEmail};

@@ -42,8 +42,7 @@ export const loginUser = userData => dispatch => {
 };
 // ForgotPassword
 export const forgotUser = (userData, history) => dispatch => {
-  axios
-    .post('/api/users/forgotpassword', userData)
+  axios.put('/api/users/forgotpassword', userData)
     .then(res => history.push('/login'))
     .catch(err =>
       dispatch({
